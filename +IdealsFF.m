@@ -1,15 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
-//    +IdealsFunctionFields Package 
+//    +IdealsFF Package 
 //    Jens-Dietrich Bauch 
-//    April 2010
-//    (C) 2013 Jens-Dietrich Bauch
+//    September 2017
+//    (C) 2017 Jens-Dietrich Bauch
 //    Distributed under the terms of the GNU General Public License 
 //    http://www.gnu.org/licenses/gpl.txt  
 /////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 //    Many routines are translations from the package +Ideals.m
+//    Code can be found on http://montesproject.blogspot.cat/  
 //	  The package is implemented for Magma V2.17-6	
 /////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +37,7 @@ AddAttribute(FldFun,"MonicDefiningPoly");
 AddAttribute(FldFun,"ReductionON");
 AddAttribute(FldFun,"DivisorOfDegree1");
 AddAttribute(FldFun,"ConstanFieldIndex");
+
 //Records for places and Divisors
 
 PlaceRecord:=recformat<
@@ -53,8 +55,8 @@ PlaceRecord:=recformat<
 	IsPrincipal:	BoolElt
     >;
 
-//Records for montes algorithm
-				
+//Records for Montes algorithm
+//Details about the Montes algorithm can be found under https://arxiv.org/abs/1005.1156				
 PrimeIdealRecord:=recformat<
 Type: SeqEnum,
 Parent: FldFun,
@@ -138,14 +140,14 @@ OkutsuFrameLevel := recformat<
     polynomial: RngUPolElt
 >;
 
-
-
-
+// For the representation of a function field we follow the approach
+// from https://arxiv.org/abs/1601.01361
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
 intrinsic InfinityRepresentation(F::FldFun)->FldFun
-{Input: Function field F with indeterminate T, outpout: Function field F with indeterminate 1/T}
+{Input: Function field F with defining polynomial f
+ Output: Function field with defining polynomial f_\infty defined as in https://arxiv.org/abs/1601.01361}
 
 	F`Fin:=1;
 	if not assigned F`InfinityRepresentation or not assigned F`Cf then
@@ -183,8 +185,8 @@ end intrinsic;
 //////////////////////////////////////////////////////////////////////
 
 intrinsic TranslationMap(z::FldFunElt,F::FldFun)->FldFunElt
-{Input: z element of function field F with indeterminate T, output: z element of 
-isomorphic function field F` with indeterminate 1/T }
+{Input: z element of function field F over k(t)
+ Output: same element z represented as an element in the infinity representation of F}
 
 	K:=Parent(z); KT:=BaseField(K);	T:=KT.1;
 	Coeffs:=Eltseq(z);
@@ -196,11 +198,11 @@ end intrinsic;
 
 
 //////////////////////////////////////////////////////////////////////
+/////////Routines dealing with  Divisor arithmetic////////////////////
 //////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-/////////Divisor Arithmetic///////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
+
+
+// A place is constructed as a pair of two ideals (I,I_\infty)
 
 intrinsic Place(P::Rec)->Rec
 {Construction of the place of a record}
